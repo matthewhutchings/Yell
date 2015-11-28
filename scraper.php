@@ -1,27 +1,33 @@
-<?
-// This is a template for a PHP scraper on morph.io (https://morph.io)
-// including some code snippets below that you should find helpful
+<?php
+require 'scraperwiki.php'; 
+require 'simple_html_dom.php';
 
- require 'scraperwiki.php';
- require 'scraperwiki/simple_html_dom.php';
-//
-// // Read in a page
- $html = scraperwiki::scrape("https://www.yell.com/ucs/UcsSearchAction.do?keywords=pizza&location=bournemouth&scrambleSeed=833794509");
-//
-// // Find something on the page using css selectors
+
+$url_base = "https://www.yell.com/ucs/UcsSearchAction.do?keywords=pizza&location=southampton&scrambleSeed=833794509";
+
+
+$mainUrl = scraperWiki::scrape($url_base);
 $dom = new simple_html_dom();
-$dom->load($html);
-print_r($dom->find("div.businessCapsule--title"));
-//
-// // Write out to the sqlite database using scraperwiki library
-scraperwiki::save_sqlite(array('name'), array('name' => 'susan', 'occupation' => 'software developer'));
-//
-// // An arbitrary query against the database
-// scraperwiki::select("* from data where 'name'='peter'")
+$dom->load($mainUrl);
 
-// You don't have to do things with the ScraperWiki library.
-// You can use whatever libraries you want: https://morph.io/documentation/php
-// All that matters is that your final data is written to an SQLite database
-// called "data.sqlite" in the current working directory which has at least a table
-// called "data".
+# Just focus on the a section of the web site
+$dataset = $dom->find("div.businessCapsule-fle");
+
+
+
+# The usual, look for the data set and if needed, save it
+foreach($dataset as $record) {
+    # Slow way to transform the date but it works
+     
+    # Put all information in an array
+    $application = array (
+        'name' => trim($record->find("div.businessCapsule--title")->plaintext),
+        'date_received' => date('Y-m-d', strtotime($date_received))
+    );
+
+        scraperwiki::save(array('council_reference'), $application);
+
+
+
+}
 ?>
